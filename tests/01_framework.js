@@ -9,25 +9,8 @@ $(document).ready(function(){
 	});
 
 	module("Object Definition");
-	test("asyncTest", function(){
-		stop();
-		expect(2);
-		setTimeout(function(){
-			ok(true, 'success');
-			
-			$.ajax({
-				url: "test_responder.html", 
-				success: function(){
-					ok(true, "ajax success");
-					start();
-				}
-			});
-		}, 100);
-	});
-	
-	
-	test("Methods in the framework", function(){
-	  	expect(2);
+	test("test success handlers", function(){
+	  	expect(5);
 		stop();
 		var config = {
 			dbtype:"html",
@@ -38,12 +21,30 @@ $(document).ready(function(){
 		
 		
 		setTimeout(function(){
-			ok(true, 'done the starting of the timeout');
 			penjs.get({
 					id:1, 
 					success: function(data){
-						ok(true, "get success");
-						ok(data, "got some data");					
+						ok(true, "get");
+					}
+				})
+				.list({
+					success: function(data){
+						ok(true, "list");
+					}
+				})
+				.save({
+					success:function(data){
+						ok(true, "save");
+					}
+				})
+				.deleteObject({
+					success:function(data){
+						ok(true, "deleteObject");
+					}
+				})
+				.createTable({
+					success:function(data){
+						ok(true, "createTable");
 					}
 				});
 			start();
@@ -51,5 +52,50 @@ $(document).ready(function(){
 		},100);
 	});
 	
+	test("Get the Database for HTML5", function(){
+		expect(1);
+			var config = {
+				dbtype:"html",
+				dbname:"testdb1",
+				log: true,
+				objects:[
+							{	name:"TestObject",
+					 			fields: []
+							}
+						]
+				};//end config
+			var penjs = new PENJS(config);
+			var db = penjs._getDatabase();
+			ok(db, "got the database");
+		
+		
+	});
+	
+	test("Create Table for a simple Object (should only have an id)", function(){
+		expect(1);
+		stop();	
+			var config = {
+				dbtype:"html",
+				dbname:"testdb1",
+				log: true,
+				objects:[
+							{	name:"TestObject",
+					 			fields: []
+							}
+						]
+				};//end config
+			var penjs = new PENJS(config);
+			
+			penjs.createTable({
+				object:config.objects[0], //The table we are going to create
+				success: function(data){
+					ok(true, "createTable");
+				}
+			});
+			
+		
+	});
+	
+
 
 });

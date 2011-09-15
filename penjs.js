@@ -1,5 +1,8 @@
 function PENJS(config){
 	this._config = config;
+	this._dbname = config.dbname;
+	this._dbversion = config.dbversion ? config.dbversion : 1.0;
+	this._dbsize = config.dbsize ? config.dbsize : 100000;
 	
 	this._init();
 	return this;
@@ -10,14 +13,10 @@ function PENJS(config){
 */
 PENJS.prototype._init = function(){
 	if(this._config.log){
-		console.log("Initialising PENJS");
-		console.log(this._config)
+		this.log("Initialising PENJS");
+		this.log(this._config)
 	}
 	
-
-	
-	//Let's see what objects we have to create tables with.
-
 	
 }
 
@@ -28,20 +27,13 @@ PENJS.prototype.getDBType = function(){
 PENJS.prototype.get = function(object){
 	
 	var rObject = {}; //The object we are going to return 
-	if(this._config.log){
-		console.log("get object", object);
-	}
+
 	
-	if(!object.name){
-		//It's the lest we need!
-		return new Error("property 'name' is required. Otherwise I don't know what object you want");
-	}
 	
 	
 	//Call the success handler
 	if("success" in object){
-		console.log("Running the success handler", rObject)
-		object['success'](rObject);
+		object.success(rObject);
 	}
 	
 	//Call the errror handler if they want to handle it
@@ -53,20 +45,66 @@ PENJS.prototype.get = function(object){
 
 PENJS.prototype.list = function(object){
 	
+	if("success" in object){
+		object.success();
+	}
+	
+	return this;
 }
 
 PENJS.prototype.save = function(object){
+	
+	
+	if("success" in object){
+		object.success();
+	}
+	return this;
 }
 
 
-PENJS.prototype.delete = function(object){
+PENJS.prototype.deleteObject = function(object){
 	
+	if("success" in object){
+		object.success();
+	}
+	return this;
 }
 
 PENJS.prototype.createTable = function(object){
+	this.log("Starting to create a table ", object);
+	
+	var callback = object.success ? object.success : null;
+	
+	if("object" in object){ //we have a table to create
+	 var create_result = this._createTable(object.object.name, object.object.fields, object.success);
+	}
+
+	return this;
+}
+
+PENJS.prototype._createTable = function(tablename, fields, callback){
+	var database = this._getDatabase();
+	
+	
+	
+	if(callback){
+		callback();
+	}
 	
 }
 
+PENJS.prototype._getDatabase = function(){
+	
+	var Database = openDatabase(this._dbname,this._dbversion,this._dbname, this._dbsize);
+	this.log("The Database", Database)
+	return Database;
+}
+
+PENJS.prototype.log = function(message, object) {
+	if(this._config.log && "console" in window){
+		console.log(message, object);
+	}
+};
 /*
 	Used to save remotely if we have to
 */
